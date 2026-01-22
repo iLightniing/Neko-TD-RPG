@@ -14,7 +14,7 @@ const { getClassImage } = useGameClasses()
         
         <!-- Character Title -->
         <div class="absolute top-0 inset-x-0 text-center animate-fade-in-down">
-            <h2 class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 mb-2">Nouvelle Recrue</h2>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 mb-2">Nouveau personnage</h2>
             <h1 class="text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter italic drop-shadow-2xl"
                 :class="`text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400`">
                 {{ selectedClass?.name }}

@@ -1,6 +1,6 @@
-import knightImg from '~/assets/images/characters/knight.png'
-import rogueImg from '~/assets/images/characters/rogue.png'
-import wizardImg from '~/assets/images/characters/wizard.png'
+import knightImg from '~/assets/images/characters/avatar/knight.png'
+import rogueImg from '~/assets/images/characters/avatar/rogue.png'
+import mageImg from '~/assets/images/characters/avatar/wizard.png'
 
 export const useGameClasses = () => {
     const { pb } = useAuth()
@@ -17,7 +17,7 @@ export const useGameClasses = () => {
             desc: 'Un combattant redoutable qui écrase ses ennemis par la force brute. Sa résistance exceptionnelle lui permet de survivre aux assauts les plus violents.',
             color: 'text-red-500',
             bg: 'bg-red-500',
-            stats: { strength: 8, agility: 3, intelligence: 2, defense: 9 },
+            stats: { strength: 8, agility: 3, intelligence: 2, defense: 9, vitality: 6, luck: 2 },
             evolution: ['Paladin', 'Berserker']
         },
         { 
@@ -28,7 +28,7 @@ export const useGameClasses = () => {
             desc: 'Un maître de la furtivité et de la précision. Il frappe les points vitaux de ses adversaires avant de disparaître dans les ombres.',
             color: 'text-emerald-500',
             bg: 'bg-emerald-500',
-            stats: { strength: 4, agility: 9, intelligence: 3, defense: 4 },
+            stats: { strength: 4, agility: 9, intelligence: 3, defense: 4, vitality: 4, luck: 8 },
             evolution: ['Assassin', 'Ombre']
         },
         { 
@@ -39,7 +39,7 @@ export const useGameClasses = () => {
             desc: 'Un érudit des arts arcaniques capable de déchaîner les éléments. Sa puissance destructrice est sans égale, mais il reste fragile.',
             color: 'text-blue-500',
             bg: 'bg-blue-500',
-            stats: { strength: 2, agility: 4, intelligence: 10, defense: 2 },
+            stats: { strength: 2, agility: 4, intelligence: 10, defense: 2, vitality: 3, luck: 4 },
             evolution: ['Archimage', 'Nécromancien']
         }
     ]
@@ -50,7 +50,14 @@ export const useGameClasses = () => {
             const records = await pb.collection('classes').getFullList({ sort: 'name' })
             console.log("Classes chargées depuis PocketBase:", records)
             if (records && records.length > 0) {
-                classes.value = records
+                // On s'assure que chaque classe a des stats, sinon on utilise les valeurs par défaut (fallback)
+                classes.value = records.map(record => {
+                    const defaultClass = defaultClasses.find(d => d.key === record.key)
+                    return {
+                        ...record,
+                        stats: (record.stats && Object.keys(record.stats).length > 0) ? record.stats : (defaultClass?.stats || {})
+                    }
+                })
             } else {
                 console.warn("Aucune classe trouvée en BDD (Collection vide ?), utilisation du fallback.")
                 classes.value = defaultClasses
@@ -78,7 +85,7 @@ export const useGameClasses = () => {
         // Fallback local
         if (key === 'warrior' || cls?.key === 'warrior') return knightImg
         if (key === 'rogue' || cls?.key === 'rogue') return rogueImg
-        if (key === 'mage' || cls?.key === 'mage') return wizardImg
+        if (key === 'mage' || cls?.key === 'mage') return mageImg
         return undefined
     }
 
@@ -94,5 +101,5 @@ export const useGameClasses = () => {
         return getClassInfo(key)?.bg || 'bg-slate-500'
     }
 
-    return { classes, fetchClasses, getClassImage, getClassName, getClassBg }
+    return { classes, fetchClasses, getClassImage, getClassName, getClassBg, getClassInfo }
 }

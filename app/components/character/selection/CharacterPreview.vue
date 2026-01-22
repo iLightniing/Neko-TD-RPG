@@ -28,7 +28,7 @@ const { getClassImage, getClassName, getClassBg } = useGameClasses()
             </div>
 
             <!-- Model -->
-            <div class="relative w-full h-[40vh] lg:h-[60vh] flex items-center justify-center my-8 group perspective-1000">
+            <div class="relative w-full h-[40vh] lg:h-[50vh] flex items-center justify-center my-8 group perspective-1000">
                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[100px] transition-colors duration-700 opacity-40"
                         :class="getClassBg(character)"></div>
                 

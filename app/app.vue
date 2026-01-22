@@ -16,9 +16,9 @@ const quitApp = () => {
 // Contrôles de la fenêtre
 const minimizeWindow = () => (window as any).electronAPI?.minimize()
 const maximizeWindow = () => (window as any).electronAPI?.maximize()
-const closeWindow = () => {
+const closeWindow = async () => {
     game.saveGame()
-    logout() // Déconnexion à la fermeture
+    await logout() // Déconnexion à la fermeture (attend le délai du loader)
     if ((window as any).electronAPI) {
         (window as any).electronAPI.close()
     } else {
@@ -44,7 +44,7 @@ onMounted(() => {
     <header v-if="isElectron" class="h-8 bg-slate-800/50 border-b border-white/5 flex items-center justify-between pl-4 shrink-0 z-50 backdrop-blur-md" style="-webkit-app-region: drag">
         <div class="flex items-center gap-2 text-amber-400 font-black tracking-widest text-xs select-none">
             <Icon name="lucide:swords" class="w-4 h-4"/>
-            <span>LOOPBREAKER</span>
+            <span>NEKO : IDLE RPG</span>
         </div>
         
         <div class="flex items-center h-full gap-4" style="-webkit-app-region: no-drag">
@@ -92,6 +92,9 @@ onMounted(() => {
         <UiButton @click="confirmQuit" variant="danger" class="flex-1">Quitter</UiButton>
       </div>
     </UiModal>
+
+    <!-- Le Loader Global qui s'affiche par-dessus tout -->
+    <UiGlobalLoader />
   </div>
 </template>
 
@@ -99,13 +102,12 @@ onMounted(() => {
 /* Transitions de page globales */
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(5px);
-  filter: blur(2px);
+  transform: scale(0.98);
 }
 
 @keyframes fade-in {

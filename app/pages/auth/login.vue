@@ -11,6 +11,10 @@ const { login, error, isLoading } = useAuth()
 const email = ref('')
 const password = ref('')
 const rememberEmail = ref(false)
+const route = useRoute()
+
+const showVerifiedModal = ref(false)
+const isVerifiedSuccess = ref(false)
 
 // Effacer le message d'erreur dès que l'utilisateur modifie un champ
 watch([email, password], () => {
@@ -23,6 +27,14 @@ onMounted(() => {
     if (saved) {
         email.value = saved
         rememberEmail.value = true
+    }
+
+    // Vérifier si on revient d'une confirmation d'email
+    if (route.query.verified !== undefined) {
+        isVerifiedSuccess.value = route.query.verified === 'true'
+        showVerifiedModal.value = true
+        // Nettoyer l'URL pour ne pas réafficher la modale au refresh
+        window.history.replaceState({}, '', '/auth/login')
     }
 })
 
@@ -47,31 +59,53 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <form @submit.prevent="handleLogin" class="space-y-4" novalidate>
-        <div v-if="error" class="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-            <Icon name="lucide:alert-circle" class="w-4 h-4"/> {{ error }}
-        </div>
+    <div>
+        <form @submit.prevent="handleLogin" class="space-y-4" novalidate>
+            <div v-if="error" class="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                <Icon name="lucide:alert-circle" class="w-4 h-4"/> {{ error }}
+            </div>
 
-        <UiInput v-model="email" label="Email" type="email" placeholder="heros@loopbreaker.com" icon="lucide:mail" required />
-        <div class="-mt-2">
-            <UiCheckbox v-model="rememberEmail" label="Se souvenir de l'email" />
-        </div>
-        
-        <UiInput v-model="password" label="Mot de passe" type="password" placeholder="••••••••" icon="lucide:lock" required />
+            <UiInput v-model="email" label="Email" type="email" placeholder="heros@loopbreaker.com" icon="lucide:mail" required />
+            <div class="-mt-2">
+                <UiCheckbox v-model="rememberEmail" label="Se souvenir de l'email" />
+            </div>
+            
+            <UiInput v-model="password" label="Mot de passe" type="password" placeholder="••••••••" icon="lucide:lock" required />
 
-        <div class="flex justify-end">
-            <NuxtLink to="/auth/forgot-password" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">Mot de passe oublié ?</NuxtLink>
-        </div>
+            <div class="flex justify-end">
+                <NuxtLink to="/auth/forgot-password" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">Mot de passe oublié ?</NuxtLink>
+            </div>
 
-        <button type="submit" :disabled="isLoading"
-            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
-            <Icon v-if="isLoading" name="lucide:loader-2" class="animate-spin" />
-            <span>{{ isLoading ? 'Connexion...' : 'Se connecter' }}</span>
-        </button>
+            <button type="submit" :disabled="isLoading"
+                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/20">
+                <Icon v-if="isLoading" name="lucide:loader-2" class="animate-spin" />
+                <span>{{ isLoading ? 'Connexion...' : 'Se connecter' }}</span>
+            </button>
 
-        <div class="text-center text-sm text-slate-400 mt-4">
-            Pas encore de compte ? 
-            <NuxtLink to="/auth/register" class="text-indigo-400 hover:text-indigo-300 font-bold transition-colors">Créer un compte</NuxtLink>
-        </div>
-    </form>
+            <div class="text-center text-sm text-slate-400 mt-4">
+                Pas encore de compte ? 
+                <NuxtLink to="/auth/register" class="text-indigo-400 hover:text-indigo-300 font-bold transition-colors">Créer un compte</NuxtLink>
+            </div>
+        </form>
+
+        <!-- Modale de confirmation d'email -->
+        <UiModal :show="showVerifiedModal" :title="isVerifiedSuccess ? 'Compte activé !' : 'Échec de l\'activation'" @close="showVerifiedModal = false">
+            <div class="text-center space-y-4">
+                <div v-if="isVerifiedSuccess" class="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto border border-green-500/30 shadow-lg shadow-green-900/20">
+                    <Icon name="lucide:check-circle" class="w-8 h-8" />
+                </div>
+                <div v-else class="w-16 h-16 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center mx-auto border border-red-500/30 shadow-lg shadow-red-900/20">
+                    <Icon name="lucide:x-circle" class="w-8 h-8" />
+                </div>
+                
+                <p class="text-slate-300">
+                    {{ isVerifiedSuccess 
+                        ? "Votre adresse email a été confirmée avec succès. Vous pouvez maintenant vous connecter et commencer votre aventure !" 
+                        : "Le lien de confirmation est invalide ou a expiré. Veuillez réessayer ou contacter le support." 
+                    }}
+                </p>
+                <UiButton @click="showVerifiedModal = false" block class="mt-4">Compris</UiButton>
+            </div>
+        </UiModal>
+    </div>
 </template>

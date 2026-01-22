@@ -2,6 +2,15 @@
 defineProps<{
     selectedClass: any
 }>()
+
+const statLabels: Record<string, string> = {
+    strength: 'Force',
+    agility: 'Agilité',
+    intelligence: 'Intelligence',
+    defense: 'Défense',
+    vitality: 'Vitalité',
+    luck: 'Chance'
+}
 </script>
 
 <template>
@@ -24,13 +33,13 @@ defineProps<{
             
             <div v-for="(val, stat) in selectedClass?.stats" :key="stat" class="group">
                 <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">
-                    <span>{{ stat }}</span>
-                    <span class="text-white">{{ val }}/10</span>
+                    <span>{{ statLabels[stat] || stat }}</span>
+                    <span class="text-white">{{ val }}</span>
                 </div>
                 <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
                     <div class="h-full rounded-full transition-all duration-1000 ease-out relative"
                          :class="selectedClass?.bg"
-                         :style="{ width: (val / 10 * 100) + '%' }">
+                         :style="{ width: Math.min(100, (val / 20 * 100)) + '%' }">
                          <div class="absolute inset-0 bg-white/20 animate-pulse-slow"></div>
                     </div>
                 </div>

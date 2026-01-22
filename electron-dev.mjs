@@ -16,7 +16,7 @@ waitOn({
     console.log('--- Nuxt est prêt, lancement d\'Electron... ---');
     
     // 3. Lance Electron en pointant sur ton fichier main.cjs
-    const child = spawn(electron, ['electron/main.cjs'], { 
+    const child = spawn(`"${electron}"`, ['electron/main.cjs'], { 
         shell: true, 
         stdio: 'inherit',
         env: { ...process.env, VITE_DEV_SERVER_URL: 'http://localhost:3000' }

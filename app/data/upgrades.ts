@@ -1,31 +1,70 @@
-// data/upgrades.ts
 export interface Upgrade {
-  id: string;
-  name: string;
-  description: string;
-  baseCost: number;
-  costMultiplier: number; // Ex: 1.15 (le prix augmente de 15% à chaque achat)
-  type: 'click' | 'passive';
-  power: number;
+    id: string
+    name: string
+    type: 'click' | 'auto'
+    power: number
+    baseCost: number
+    costMultiplier: number
 }
 
 export const UPGRADES: Upgrade[] = [
-  {
-    id: 'wooden_sword',
-    name: 'Épée en bois',
-    description: 'Une branche ramassée par terre.',
-    baseCost: 10,
-    costMultiplier: 1.15,
-    type: 'click',
-    power: 1
-  },
-  {
-    id: 'training_dummy',
-    name: 'Mannequin d\'entraînement',
-    description: 'Génère de l\'or passivement.',
-    baseCost: 50,
-    costMultiplier: 1.20,
-    type: 'passive',
-    power: 2
-  }
+    // Améliorations de Clic (Dégâts directs)
+    {
+        id: 'u_click_1',
+        name: 'Poings nus',
+        type: 'click',
+        power: 1,
+        baseCost: 10,
+        costMultiplier: 1.5
+    },
+    {
+        id: 'u_click_2',
+        name: 'Gants de cuir',
+        type: 'click',
+        power: 3,
+        baseCost: 50,
+        costMultiplier: 1.5
+    },
+    {
+        id: 'u_click_3',
+        name: 'Dague rouillée',
+        type: 'click',
+        power: 8,
+        baseCost: 250,
+        costMultiplier: 1.5
+    },
+    {
+        id: 'u_click_4',
+        name: 'Épée courte',
+        type: 'click',
+        power: 20,
+        baseCost: 1000,
+        costMultiplier: 1.5
+    },
+
+    // Améliorations Automatiques (Revenus passifs / Dégâts par seconde)
+    {
+        id: 'u_auto_1',
+        name: 'Rat domestique',
+        type: 'auto',
+        power: 1,
+        baseCost: 15,
+        costMultiplier: 1.2
+    },
+    {
+        id: 'u_auto_2',
+        name: 'Esclave Gobelin',
+        type: 'auto',
+        power: 5,
+        baseCost: 100,
+        costMultiplier: 1.2
+    },
+    {
+        id: 'u_auto_3',
+        name: 'Squelette',
+        type: 'auto',
+        power: 15,
+        baseCost: 500,
+        costMultiplier: 1.2
+    }
 ]

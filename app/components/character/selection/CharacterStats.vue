@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import UiStatBar from '~/components/ui/UiStatBar.vue'
-
 const props = defineProps<{
     character: any
 }>()
 
 const emit = defineEmits(['delete'])
 const { getClassBg } = useGameClasses()
+
+const statConfig = [
+    { key: 'strength', label: 'Force', color: 'bg-red-500' },
+    { key: 'agility', label: 'Agilité', color: 'bg-emerald-500' },
+    { key: 'intelligence', label: 'Intel', color: 'bg-blue-500' },
+    { key: 'vitality', label: 'Vitalité', color: 'bg-pink-500' },
+    { key: 'luck', label: 'Chance', color: 'bg-purple-500' },
+    { key: 'defense', label: 'Défense', color: 'bg-yellow-500' },
+]
 </script>
 
 <template>
@@ -19,10 +26,19 @@ const { getClassBg } = useGameClasses()
             <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-6">Attributs</h3>
             
             <div class="space-y-4">
-                <UiStatBar label="Force" :value="character.data?.stats?.strength || 0" :max="20" color="bg-red-500" show-value />
-                <UiStatBar label="Agilité" :value="character.data?.stats?.agility || 0" :max="20" color="bg-emerald-500" show-value />
-                <UiStatBar label="Intel" :value="character.data?.stats?.intelligence || 0" :max="20" color="bg-blue-500" show-value />
-                <UiStatBar label="Défense" :value="character.data?.stats?.defense || 0" :max="20" color="bg-yellow-500" show-value />
+                <div v-for="stat in statConfig" :key="stat.key" class="space-y-1">
+                    <div class="flex justify-between text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                        <span>{{ stat.label }}</span>
+                        <span class="text-white">{{ character.stats?.[stat.key] || 0 }}</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-1000 ease-out relative"
+                             :class="stat.color"
+                             :style="{ width: Math.min(100, ((character.stats?.[stat.key] || 0) / 20 * 100)) + '%' }">
+                             <div class="absolute inset-0 bg-white/20 animate-pulse-slow"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -40,4 +56,5 @@ const { getClassBg } = useGameClasses()
 <style scoped>
 .animate-slide-left { animation: slideLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes slideLeft { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+.animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 </style>

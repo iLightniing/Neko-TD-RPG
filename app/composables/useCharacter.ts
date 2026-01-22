@@ -1,27 +1,68 @@
-import { ref } from 'vue'
-
 export const useCharacter = () => {
     const { pb, user } = useAuth()
-    // const { notify } = useNotification() // À décommenter si vous avez ce composable
-    const character = useState<any>('current_character', () => null)
-    const characters = useState<any[]>('user_characters', () => [])
+    // On utilise useState pour l'état global
+    const character = useState<any>('character', () => null)
+    const characters = useState<any[]>('characters_list', () => [])
 
-    // Récupérer TOUS les personnages de l'utilisateur
+    // Au chargement de l'app, on regarde s'il y a une sauvegarde dans le navigateur
+    if (import.meta.client) {
+        const stored = localStorage.getItem('neko_rpg_character')
+        if (stored && !character.value) {
+            try {
+                character.value = JSON.parse(stored)
+            } catch (e) {
+                console.error('Erreur lors du chargement du personnage', e)
+                localStorage.removeItem('neko_rpg_character')
+            }
+        }
+    }
+
+    // À chaque fois que 'character' change, on met à jour la sauvegarde
+    watch(character, (newVal) => {
+        if (import.meta.client) {
+            if (newVal) {
+                localStorage.setItem('neko_rpg_character', JSON.stringify(newVal))
+            } else {
+                localStorage.removeItem('neko_rpg_character')
+            }
+        }
+    }, { deep: true })
+
     const fetchAllCharacters = async () => {
-        if (!user.value) return []
-        console.log("Chargement des personnages pour l'utilisateur:", user.value.id)
+        if (!user.value) return
         try {
             const records = await pb.collection('characters').getFullList({
-                filter: `user="${user.value.id}"`,
-                sort: '-created'
+                sort: '-created',
+                filter: `user = "${user.value.id}"`
             })
-            console.log("Personnages trouvés:", records)
             characters.value = records
-            return records
         } catch (e) {
-            console.error("Erreur chargement personnages:", e)
-            return []
+            console.error("Impossible de récupérer les personnages :", e)
         }
+    }
+
+    const createCharacter = async (pseudo: string, classId: string, stats: any) => {
+        if (!user.value) throw new Error("Utilisateur non connecté")
+        
+        // Récupérer les stats de base de la classe pour l'initialisation
+        const { getClassInfo, fetchClasses } = useGameClasses()
+        await fetchClasses() // S'assure que les classes sont chargées
+        const classInfo = getClassInfo(classId)
+        const startingStats = (stats && Object.keys(stats).length > 0) ? stats : (classInfo?.stats || {})
+
+        const newCharacter = {
+            user: user.value.id,
+            pseudo: pseudo,
+            class: classId,
+            level: 1,
+            xp: 0,
+            gold: 0,
+            stats: startingStats,
+            equipment: {},
+            inventory: []
+        }
+
+        return await pb.collection('characters').create(newCharacter)
     }
 
     const selectCharacter = (char: any) => {
@@ -29,58 +70,10 @@ export const useCharacter = () => {
     }
 
     const deleteCharacter = async (id: string) => {
-        try {
-            await pb.collection('characters').delete(id)
-            characters.value = characters.value.filter(c => c.id !== id)
-        } catch (e) {
-            console.error("Erreur suppression personnage:", e)
-            throw e
-        }
-    }
-
-    // Créer un nouveau personnage
-    const createCharacter = async (pseudo: string, className: string, initialStats?: Record<string, number>) => {
-        console.log("Tentative de création de personnage...", { pseudo, className, userId: user.value?.id })
-        
-        if (!user.value) {
-            console.error("Utilisateur non connecté !")
-            return
-        }
-        
-        // Données initiales selon la classe
-        // Si des stats sont fournies (depuis la DB/Selection), on les utilise, sinon fallback
-        const stats = initialStats || {
-            strength: className === 'warrior' ? 5 : 1,
-            intelligence: className === 'mage' ? 5 : 1,
-            agility: className === 'rogue' ? 5 : 1,
-        }
-
-        const initialData = {
-            inventory: {},
-            upgrades: {},
-            stats: stats
-        }
-
-        try {
-            const record = await pb.collection('characters').create({
-                user: user.value.id,
-                pseudo: pseudo,
-                class: className,
-                level: 1,
-                gold: 0,
-                data: initialData
-            })
-            character.value = record
-            // notify(`Personnage ${pseudo} créé !`, 'success')
-            return record
-        } catch (e: any) {
-            console.error("Erreur création personnage:", e)
-            // Affiche les détails précis de l'erreur de validation (ex: quel champ est refusé)
-            if (e.response && e.response.data) {
-                console.error("Détails validation PocketBase:", e.response.data)
-            }
-            // notify('Erreur lors de la création du personnage', 'error')
-            throw e
+        await pb.collection('characters').delete(id)
+        characters.value = characters.value.filter(c => c.id !== id)
+        if (character.value?.id === id) {
+            character.value = null
         }
     }
 
@@ -88,8 +81,8 @@ export const useCharacter = () => {
         character,
         characters,
         fetchAllCharacters,
+        createCharacter,
         selectCharacter,
-        deleteCharacter,
-        createCharacter
+        deleteCharacter
     }
 }
